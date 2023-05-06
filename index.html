@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Recherche dans Elasticsearch</title>
+    <style>
+      input[type=text] {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+      }
+      
+      input[type=submit] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      
+      input[type=submit]:hover {
+        background-color: #45a049;
+      }
+      
+      .container {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Recherche dans Elasticsearch</h2>
+      <form action="search_results.html">
+        <label for="keyword">Mot-clé:</label>
+        <input type="text" id="keyword" name="keyword" placeholder="Entrez un mot-clé...">
+        <input type="submit" value="Rechercher">
+      </form>
+    </div>
+  </body>
+  
+  <script>
+    document.querySelector("form").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const keyword = document.getElementById("keyword").value.trim();
+      
+      // Requête Elasticsearch pour récupérer le chemin associé au mot-clé
+      const request = new XMLHttpRequest();
+      request.open("GET", `http://localhost:9200/testest/_search?q=word:${keyword}&size=1`);
+      request.onreadystatechange = function() {
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+          const response = JSON.parse(this.responseText);
+          const path = response.hits.hits[0]._source.path;
+          
+          // Rediriger vers la page de résultats avec le chemin en paramètre
+          window.location.href = `result.html?path=${path}`;
+        }
+      };
+      request.send();
+    });
+  </script>
+</html>
