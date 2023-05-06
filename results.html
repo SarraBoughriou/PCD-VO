@@ -1,17 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results</title>
-    <link rel="stylesheet" href="style.css">
+	<title>Search Results</title>
+	<style>
+		/* CSS styles for search results */
+		.result {
+			margin-top: 10px;
+			padding: 10px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+		}
+		.result h3 {
+			margin-top: 0;
+			margin-bottom: 5px;
+		}
+		.result p {
+			margin-top: 0;
+		}
+	</style>
 </head>
 <body>
-    <div id="result">
-		<p>Aucun résultat trouvé</p>
-		<input type="button" value="Ajouter des modifications" onclick="modify()">
-	</div>
-    
+	<h1>Search Results</h1>
+	<div id="results"></div>
+	<script>
+		// JS code for displaying search results
+		var results = []; // array to store search results
+		// assume the search results are fetched from Elasticsearch and stored in the `results` array
+		for (var i = 0; i < results.length; i++) {
+			var result = results[i];
+			var div = document.createElement('div');
+			div.className = 'result';
+			var h3 = document.createElement('h3');
+			h3.textContent = result.title; // assume the title is stored in the `title` field
+			var p = document.createElement('p');
+			p.textContent = result.path; // assume the path is stored in the `path` field
+			div.appendChild(h3);
+			div.appendChild(p);
+			document.getElementById('results').appendChild(div);
+
+			const params = new URLSearchParams(window.location.search);
+const path = params.get('path');
+
+// Requête Elasticsearch pour récupérer les résultats de recherche
+const request = new XMLHttpRequest();
+request.open("GET", `http://localhost:9200/testest/_search?q=path:${path}`);
+request.onreadystatechange = function() {
+  if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+    const response = JSON.parse(this.responseText);
+    const hits = response.hits.hits;
+    const resultsDiv = document.getElementById('results');
+
+    for (let i = 0; i < hits.length; i++) {
+      const hit = hits[i];
+      const div = document.createElement('div');
+      div.className = 'result';
+      const h3 = document.createElement('h3');
+      h3.textContent = hit._source.title;
+      const p = document.createElement('p');
+      p.textContent = hit._source.path;
+      div.appendChild(h3);
+      div.appendChild(p);
+      resultsDiv.appendChild(div);
+    }
+  }
+};
+request.send();
+
+		}
+	</script>
 </body>
 </html>
